@@ -71,7 +71,7 @@ The library management system addresses several key challenges, including:
 - [@Akanksha Sharma](https://github.com/akankshasharmadid)
     [![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/akanksha-12831bb1)
     [![Leetcode](https://img.shields.io/badge/LeetCode-000000?style=for-the-badge&logo=LeetCode&logoColor=#d16c06)](https://www.leetcode.com/akanksha185/)
-- [@Lizz Hunt](https://github.com/seattlelizzard)
+
 
 - [@Hanisha Karri](https://github.com/hanisha-karri)
     [![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/hanisha-karri-86b90a137/)
