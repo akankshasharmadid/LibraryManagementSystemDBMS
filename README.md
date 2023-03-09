@@ -6,6 +6,10 @@
 - [Mission Statement](#mission-statement)
 - [Summary of Problem](#summary-of-problem)
 - [External Model](#external-model)
+- [Methods Used](#methods-used)
+- [Technologies and Softwares](#technologies-and-softwares)
+- [Required Packages](#required-packages)
+- [Slides](#slides)
 - [Authors](#authors)
 
 
@@ -63,6 +67,36 @@ The library management system addresses several key challenges, including:
 
 
 
+## Methods Used
+[(Back to top)](#table-of-contents)
+
+* Database Design
+* ER Modeling  
+* Tinkter App
+* Data Visualization using Tableau
+* Database Integration
+* Tableau / SQL and Python Integration
+
+
+
+## Technologies and Softwares
+[(Back to top)](#table-of-contents)
+
+* SQL
+* Tinkter
+* Tableau
+
+
+## Required Packages
+[(Back to top)](#table-of-contents)
+
+* mysql.connector
+* webview
+* tableau_api_lib
+
+
+## Slides
+[(Back to top)](#table-of-contents)
 
 
 ## Authors
@@ -77,3 +111,4 @@ The library management system addresses several key challenges, including:
     [![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/hanisha-karri-86b90a137/)
 
 - [@Hrishikesh Deepak Dhole](https://github.com/Hrish52) [![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/hrishikesh-dhole-43b150159/)
+- [@Malia Cortez](https://github.com/Malia-T) [![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/malia-c)
