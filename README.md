@@ -55,7 +55,7 @@ The library management system addresses several key challenges, including:
 
 7. Tracking and retrieval of physical book information at the library. 
 
-8, A user-friendly interface that simplifies library operations for the librarian. 
+8. A user-friendly interface that simplifies library operations for the librarian. 
 
 
 ## External Model
