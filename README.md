@@ -2,7 +2,7 @@
 
 ## Table of contents
 - [Table of contents](#table-of-contents)
-- [Library Management System DBMS](#library-management-system-dbms)
+- [Library Management System DBMS](#librarymanagementsystemdbms)
 - [Mission Statement](#mission-statement)
 - [Summary of Problem](#summary-of-problem)
 - [External Model](#external-model)
