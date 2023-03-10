@@ -1,0 +1,530 @@
+from tkinter import *
+import mysql.connector as mysql
+from tkinter import messagebox
+from PIL import Image, ImageTk
+import datetime
+import webview
+from tableau_api_lib import TableauServerConnection
+
+# Create a label with bold font
+bold_font = ("Arial", 12, "bold")
+
+def get_data(frame,m_id,table,col):
+    id = m_id.get()
+    if(id == ''):
+        messagebox.showinfo(title='Fetch Status', message = 'ID is compulsory for extracting the data')
+                
+    else:
+        # Set connection with database
+        con = mysql.connect(host="cssql",user='mk_5071team05', password='mk_5071team05Pass-', database='mk_5071team05_LMS')
+        cursor = con.cursor()
+        print(id)
+        query = '''SELECT * FROM {}  WHERE {}  = {}'''.format(table,col,id)
+        print(query)
+        #cursor.execute('''SELECT * FROM MEMBER WHERE member_id = 5''')
+        cursor.execute(query)
+                      
+        # Fetch the data and column headings
+        rows = cursor.fetchall()
+        col_names = [desc[0] for desc in cursor.description]
+        # Create a frame to hold the labels
+        frame_data = Frame(frame)
+        frame_data.place(x = 10,y=0)
+
+        # Create a label for each column name and place it in the frame
+        for i, name in enumerate(col_names):
+            label = Label(frame_data, text=name.upper(), borderwidth=3, relief="solid",font= bold_font,padx=1,pady=1)
+            label.grid(row=0, column=i, sticky="nsew")
+            
+        frame.grid_rowconfigure(i, weight=1)
+
+        # Create a label for each row and place it in the frame
+        for j, row in enumerate(rows):
+            for i, item in enumerate(row):
+                label = Label(frame_data, text=item, borderwidth=1, relief="solid")
+                label.grid(row=j+1, column=i,  sticky="nsew")
+                frame.grid_columnconfigure(i, weight=1)
+            frame.grid_rowconfigure(j, weight=1)
+
+    
+
+
+
+
+
+
+# Define a function to insert data into the table
+def insert_data(entries,columns,table,query_insert):
+    con = mysql.connect(host="cssql",user='mk_5071team05', password='mk_5071team05Pass-', database='mk_5071team05_LMS')
+    cursor = con.cursor()
+    
+    print(entries[0].get())
+    values = []
+    for i in range(len(entries)):
+        values.append(entries[i].get())
+    #print(values)
+    val = ', '.join([f"'{x}'" for x in values])
+    print(val)
+
+    query = query_insert +'('  + val + ')'
+    
+    print(query)
+    
+    cursor.execute(query)
+    con.commit()
+    for entry in entries:
+        entry.delete(0, END)
+    con.close()
+
+def column_frame_design(frame,table,query_insert):
+    # Set connection with database
+    con = mysql.connect(host="cssql",user='mk_5071team05', password='mk_5071team05Pass-', database='mk_5071team05_LMS')
+    cursor = con.cursor()
+    query = '''SELECT * FROM {}  '''.format(table)
+    cursor.execute(query)
+    columns = [desc[0] for desc in cursor.description]  
+    
+    # Create labels and entry fields for each column
+    entries = []
+    for i in range(len(columns)):
+        label = Label(frame, text=columns[i].upper())
+        label.grid(row=i, column=0,sticky='nsew')
+
+        entry = Entry(frame)
+        entry.grid(row=i, column=1,sticky='nsew')
+        entries.append(entry)
+
+    # Create a button to submit data
+    submit_button = Button(frame, text="Submit")
+    
+    submit_button.bind("<Button-1>",lambda event : insert_data(entries,columns,table,query_insert))
+    submit_button.grid(row=len(columns), column=1)
+    con.close()
+
+class Page(Frame):
+    def __init__(self, *args, **kwargs):
+        Frame.__init__(self, *args, **kwargs)
+    def show(self):
+        self.lift()
+
+class Page1(Page):
+   def __init__(self, *args, **kwargs):
+       Page.__init__(self, *args, **kwargs)
+       # Set title
+       text = Label(self , text = 'Welcome to Library Management System!', font=('Arial',40))
+       text.place(x = 35, y =40  )
+       
+       # Load the image file
+       image = Image.open("/Users/akanksha/Documents/Study Material/MS/Semester 2/DBMS/im1.png")  
+       # Create a Tkinter PhotoImage object from the image
+       
+       
+       image = image.resize((800,600))
+       photo = ImageTk.PhotoImage(image)
+       # Create a Tkinter label to display the image
+       label = Label(self, image=photo)
+       label.image = photo 
+       label.place(x = 20, y = 100)
+       label.lift()
+
+class Page2(Page):
+   def __init__(self, *args, **kwargs):
+       Page.__init__(self, *args, **kwargs)
+       frame = Frame(self,bd=12,relief = RIDGE,padx = 10 , bg = 'alice blue')
+       frame.place(x=0,y=50,height=500,width = 1250)
+       #Text for left alginment
+       text = Label(frame , text = 'Display', font=bold_font)
+       text.place(x = 0, y =5  )
+       
+       # Create two vertical frames
+       # Frame1
+       frame1 = Frame(frame, bg="light cyan", height=300, width=600,padx=5,pady=5)
+       frame1.pack(side="left")
+       member_id = Label(frame1,text = 'Enter Member ID', font = ('bold',12),padx=5,pady=5,relief=RIDGE)
+       member_id.place(x=0,y=15)
+       # Create textbox to take input 
+       m_id = Entry(frame1)
+       m_id.place(x = 120, y = 10) 
+       
+       #Text for Right alginment
+       text = Label(frame , text = 'Insert', font=bold_font)
+       text.place(x = 600, y = 5  )
+
+       frame2 = Frame(frame, bg="light cyan", height=300, width=600,padx=5,pady=5,relief=RIDGE)
+       frame2.pack(side="left")  
+       # Text for output frame
+       query =   f"INSERT INTO `MEMBER`(`member_id`,`first_name`,`last_name`,`is_student`,`is_faculty`,`book_limit`,`mobile_number`,`apartment_number`,`street`,`city`,`state`,`zip_code`,`member_expiration_date`)VALUES"
+       column_frame_design(frame2,'MEMBER',query)
+       text = Label(self , text = 'Output', font=bold_font)
+       text.place(x = 0, y =600  )
+       frame3 = Frame(self, bd = 12, height=100, width=1250,padx=10,pady=5,relief = RIDGE,bg='alice blue')
+       frame3.place(x = 0 , y = 650)
+       fetch = Button(frame1, text = 'Display Data' , font =('italic',10 ), bg = 'white')
+       fetch.bind("<Button-1>",lambda event : get_data(frame3,m_id,'MEMBER','member_id'))
+       fetch.place(x = 120 , y = 120)
+
+       
+       
+       
+
+class Page3(Page):
+   def __init__(self, *args, **kwargs):
+       Page.__init__(self, *args, **kwargs)
+       frame = Frame(self,bd=12,relief = RIDGE,padx = 10 , bg = 'alice blue')
+       frame.place(x=0,y=50,height=500,width = 1250)
+       #Text for left alginment
+       text = Label(frame , text = 'Display', font=bold_font)
+       text.place(x = 0, y =5  )
+       
+       # Create two vertical frames
+       # Frame1
+       frame1 = Frame(frame, bg="light cyan", height=300, width=600,padx=5,pady=5)
+       frame1.pack(side="left")
+       member_id = Label(frame1,text = 'Enter Staff ID', font = ('bold',12),padx=5,pady=5,relief=RIDGE)
+       member_id.place(x=0,y=15)
+       # Create textbox to take input 
+       m_id = Entry(frame1)
+       m_id.place(x = 120, y = 10) 
+       
+       #Text for Right alginment
+       text = Label(frame , text = 'Insert', font=bold_font)
+       text.place(x = 600, y = 5  )
+
+       frame2 = Frame(frame, bg="light cyan", height=300, width=600,padx=5,pady=5,relief=RIDGE)
+       frame2.pack(side="left")  
+       # Text for output frame
+       query =   f"INSERT INTO `STAFF` (`staff_id`,`first_name`,`last_name`,`designation`,`apartment_number`,`street`,`city`,`state`,`zip_code`) VALUES"
+       column_frame_design(frame2,'STAFF',query)
+       text = Label(self , text = 'Output', font=bold_font)
+       text.place(x = 0, y =600  )
+       frame3 = Frame(self, bd = 12, height=100, width=1250,padx=10,pady=5,relief = RIDGE,bg='alice blue')
+       frame3.place(x = 0 , y = 650)
+
+       #fetch = Button(frame, text = 'Display Data' , font =('italic',10 ), bg = 'white',command=get_data(m_id,frame))
+       fetch = Button(frame1, text = 'Display Data' , font =('italic',10 ), bg = 'white')
+       fetch.bind("<Button-1>",lambda event : get_data(frame3,m_id,'STAFF','staff_id'))
+       fetch.place(x = 120 , y = 120) 
+       
+
+class Page4(Page):
+    def __init__(self, *args, **kwargs):
+       Page.__init__(self, *args, **kwargs)
+       frame = Frame(self,bd=12,relief = RIDGE,padx = 10 , bg = 'alice blue')
+       frame.place(x=0,y=50,height=500,width = 1250)
+       #Text for left alginment
+       text = Label(frame , text = 'Display', font=bold_font)
+       text.place(x = 0, y =5  )
+       
+       # Create two vertical frames
+       # Frame1
+       frame1 = Frame(frame, bg="light cyan", height=300, width=600,padx=5,pady=5)
+       frame1.pack(side="left")
+       member_id = Label(frame1,text = 'Enter Transaction ID', font = ('bold',12),padx=5,pady=5,relief=RIDGE)
+       member_id.place(x=0,y=15)
+       # Create textbox to take input 
+       m_id = Entry(frame1)
+       m_id.place(x = 140, y = 10) 
+       
+       #Text for Right alginment
+       text = Label(frame , text = 'Insert', font=bold_font)
+       text.place(x = 600, y = 5  )
+
+       frame2 = Frame(frame, bg="light cyan", height=300, width=600,padx=5,pady=5,relief=RIDGE)
+       frame2.pack(side="left")  
+       # Text for output frame
+       query =   f"INSERT INTO `TRANSACTION` (`transaction_id`,`date_issued`,`ISBN`,`book_id`,`member_id`,`staff_id`,`returned_date`) VALUES"
+       column_frame_design(frame2,'TRANSACTION',query)
+       text = Label(self , text = 'Output', font=bold_font)
+       text.place(x = 0, y =600  )
+       frame3 = Frame(self, bd = 12, height=100, width=1250,padx=10,pady=5,relief = RIDGE,bg='alice blue')
+       frame3.place(x = 0 , y = 650)
+
+       #fetch = Button(frame, text = 'Display Data' , font =('italic',10 ), bg = 'white',command=get_data(m_id,frame))
+       fetch = Button(frame1, text = 'Display Data' , font =('italic',10 ), bg = 'white')
+       fetch.bind("<Button-1>",lambda event : get_data(frame3,m_id,'TRANSACTION','transaction_id'))
+       fetch.place(x = 120 , y = 120) 
+    
+def print_data(frame,query,input):
+    # Set connection with database
+    
+    con = mysql.connect(host="cssql",user='mk_5071team05', password='mk_5071team05Pass-', database='mk_5071team05_LMS')
+        
+    cursor = con.cursor()
+    
+    formatted_query = query.format(input)
+    print(formatted_query)
+    #cursor.execute(query,(input,))
+    cursor.execute(formatted_query)
+    # Fetch the results of the query
+    rows = cursor.fetchall()
+    
+    if len(rows) == 0:
+        print('0')
+        # Set title
+        text = Label(frame , text = 'No records', font=('Arial',40))
+        text.place(x = 50, y =600  )
+    else:
+        col_names = [desc[0] for desc in cursor.description]
+        # Create a frame to hold the labels
+        frame_data = Frame(frame)
+        frame_data.place(x = 50,y=600)
+
+        # Create a label for each column name and place it in the frame
+        for i, name in enumerate(col_names):
+            label = Label(frame_data, text=name.upper(), borderwidth=3, relief="solid",font= bold_font,padx=1,pady=1)
+            label.grid(row=0, column=i, sticky="nsew")
+            
+        frame.grid_rowconfigure(i, weight=1)
+        
+        # Create a label for each row and place it in the frame
+        for j, row in enumerate(rows):
+            for i, item in enumerate(row):
+                label = Label(frame_data, text=item, borderwidth=1, relief="solid")
+                label.grid(row=j+1, column=i,  sticky="nsew")
+                frame.grid_columnconfigure(i, weight=1)
+            frame.grid_rowconfigure(j, weight=1)
+    con.close()
+    
+    
+
+class Page5(Page):
+    def __init__(self, *args, **kwargs):
+        def open_link(self,link):
+            webview.create_window('Dashboard',link)
+            webview.start()
+        Page.__init__(self, *args, **kwargs)   
+        # Set title
+        text = Label(self , text = 'Tableau Dashboards', font=('Arial',40))
+        text.place(x = 35, y =40  )
+        # link 1
+        author_frequ = 'https://public.tableau.com/app/profile/akanksha.sharma2044/viz/FamousAuthor/FamousAuthorforeachyear'
+        author = Button(self, text="Famous Author Per Year")
+        author.bind("<Button-1>",lambda event : open_link(self,author_frequ))
+        author.place(x = 10 , y = 100)
+
+        # link 2
+        renew_member = 'https://public.tableau.com/app/profile/malia.c2695/viz/DataVizMilestone3/NumberofRenewals'
+        member = Button(self, text="Number of Book Renewals by Member ID")
+        member.bind("<Button-1>",lambda event : open_link(self,renew_member))
+        member.place(x = 10 , y = 150)
+
+        # link 3
+        transaction_month = 'https://public.tableau.com/app/profile/hrishikesh.dhole/viz/NumberOfTransactionsPerMonthPerYear/Sheet1'
+        month = Button(self, text="Number Of Transactions Per Month Per Year")
+        month.bind("<Button-1>",lambda event : open_link(self,transaction_month))
+        month.place(x = 10 , y = 200)
+
+        # link 4
+        book_issue = 'https://public.tableau.com/views/LMS_ML3/Sheet2?:language=en-US&publish=yes&:display_count=n&:origin=viz_share_link'
+        month = Button(self, text="Books issued by each member")
+        month.bind("<Button-1>",lambda event : open_link(self,book_issue))
+        month.place(x = 10 , y = 250)
+
+
+
+class Page6(Page):
+    def __init__(self, *args, **kwargs):
+        Page.__init__(self, *args, **kwargs) 
+        # Output 1   
+        text = Label(self , text = '1. How many books have been issued for particular author? ')
+        text.place(x = 0, y =25  )  
+        
+        #author_id = input("Enter the author ID: ")
+        query1 = """SELECT a.author_id, 
+        a.first_name, 
+        a.last_name, 
+        Count(*) AS count 
+        FROM   AUTHORS AS a 
+        INNER JOIN BOOKS AS b 
+               ON a.author_id = b.author_id 
+        INNER JOIN TRANSACTION AS t 
+               ON b.book_id = t.book_id 
+        WHERE  a.author_id = ' {} '
+        GROUP  BY a.author_id 
+        ORDER  BY count DESC, 
+          a.last_name;"""
+        author = Label(self,text = 'Enter Author ID', font = ('bold',12),padx=5,pady=5,relief=RIDGE)
+        author.place(x=0,y=55)
+        author_id = Entry(self)
+        author_id.place(x = 100, y = 55) 
+        fetch = Button(self, text = 'Display Data' , font =('italic',10 ), bg = 'white')
+        fetch.bind("<Button-1>",lambda event : print_data(self,query1, author_id.get()))
+        fetch.place(x = 120 , y = 85)
+
+
+        # Output 2   
+        
+        text = Label(self , text = '2. Worst 5 borrowers based on overdue fines? ')
+        text.place(x = 0, y =120  )  
+        query2 = """SELECT T.transaction_id, 
+       M.member_id, 
+       Sum(Datediff(returned_date, date_warning) * 0.1) AS overdue_fines 
+        FROM   TRANSACTION T 
+        JOIN MEMBER M 
+                 ON M.member_id = T.member_id 
+    WHERE  returned_date > {} 
+    GROUP  BY T.transaction_id, 
+          M.member_id 
+    ORDER  BY overdue_fines DESC 
+    LIMIT  5;"""
+        date_ = Label(self,text = 'Enter date warning (YYYY-MM-DD):', font = ('bold',12),padx=5,pady=5,relief=RIDGE)
+        date_.place(x=0,y=150)
+        date_id = Entry(self)
+        date_id.place(x = 220, y = 150) 
+        fetch2 = Button(self, text = 'Display Data' , font =('italic',10 ), bg = 'white')
+        fetch2.bind("<Button-1>",lambda event : print_data(self,query2, date_id.get()))
+        fetch2.place(x = 120 , y = 180)
+
+
+        # Output 3
+        text = Label(self , text = '3. What is the average length of time a member keeps a book?')
+        text.place(x = 0, y =215  ) 
+        query3 = """SELECT m.member_id, 
+       m.first_name, 
+       m.last_name, 
+       Avg(Datediff(t.returned_date, t.date_issued)) AS avgtime 
+FROM   MEMBER AS m 
+       INNER JOIN TRANSACTION AS t 
+               ON m.member_id = t.member_id 
+WHERE  t.is_returned = 1 AND m.member_id = {}
+GROUP  BY m.member_id 
+ORDER  BY avgtime DESC;"""
+        mem = Label(self,text = 'Enter Member ID:', font = ('bold',12),padx=5,pady=5,relief=RIDGE)
+        mem.place(x=0,y=250)
+        mem_id = Entry(self)
+        mem_id.place(x = 120, y = 250) 
+        fetch3 = Button(self, text = 'Display Data' , font =('italic',10 ), bg = 'white')
+        fetch3.bind("<Button-1>",lambda event : print_data(self,query3, mem_id.get()))
+        fetch3.place(x = 120 , y = 280)
+
+
+
+        # Output 4
+        text = Label(self , text = '4. List all overdue books, including the ISBN, member, due date and the staff who checked out the book.')
+        text.place(x = 0, y =310  ) 
+        query4 = """SELECT m.member_id, 
+       m.first_name       AS 'member first name', 
+       m.last_name        AS 'member last name', 
+       m.is_student       AS 'student', 
+       m.is_faculty       AS 'faculty', 
+       DATE_ADD(t.date_issued, INTERVAL 30 DAY) AS 'due date', 
+       t.date_warning     AS 'date warning', 
+       s.first_name       AS 'Staff Name' 
+        FROM   MEMBER AS m 
+       INNER JOIN TRANSACTION AS t 
+               ON m.member_id = t.member_id 
+       INNER JOIN STAFF AS s 
+               ON t.staff_id = s.staff_id 
+        WHERE  t.is_returned = 0 
+       AND Datediff(Now(), t.date_warning) > 0 
+       AND m.member_id= {}
+        ORDER  BY m.member_id;"""
+        mem1 = Label(self,text = 'Enter Member ID:', font = ('bold',12),padx=5,pady=5,relief=RIDGE)
+        mem1.place(x=0,y=330)
+        mem_id1 = Entry(self)
+        mem_id1.place(x = 120, y = 330) 
+        fetch4 = Button(self, text = 'Display Data' , font =('italic',10 ), bg = 'white')
+        fetch4.bind("<Button-1>",lambda event : print_data(self,query4, mem_id1.get()))
+        fetch4.place(x = 120 , y = 360)
+
+        # Output 5
+
+        text = Label(self , text = '5. List all the books in the library catalog along with their total number of copies and the number of available copies and how many are checked out? ')
+        text.place(x = 0, y =390  ) 
+        query5 = """SELECT total.book_id, 
+       total_book_count, 
+       borrowed_count, 
+       total_book_count - borrowed_count as 'Available Copies' 
+FROM   (SELECT B.book_id, 
+               Count(B.book_id) AS total_book_count 
+        FROM   BOOK_CATALOG AS B 
+        GROUP  BY B.book_id) AS total 
+       LEFT OUTER JOIN (SELECT T.book_id, 
+                               Count(T.book_id) AS 'borrowed_count' 
+                        FROM   TRANSACTION AS T 
+                        WHERE  is_returned = {}
+                        GROUP  BY T.book_id) AS borrow 
+                    ON total.book_id = borrow.book_id 
+ORDER  BY borrowed_count DESC LIMIT 4;"""
+        av1 = Label(self,text = 'Enter 1 (to see only available books), 0 (to see all books):', font = ('bold',12),padx=5,pady=5,relief=RIDGE)
+        av1.place(x=0,y=410)
+        av1_id = Entry(self)
+        av1_id.place(x = 350, y = 410)
+        fetch5 = Button(self, text = 'Display Data' , font =('italic',10 ), bg = 'white')
+        fetch5.bind("<Button-1>",lambda event : print_data(self,query5, av1_id.get()))
+        fetch5.place(x = 120 , y = 440)
+
+
+
+        # Output 6
+        text = Label(self , text = '6. List all books currently checked out by a specific member (student or professor), including the due date for each book. ')
+        text.place(x = 0, y =470  ) 
+        query6 = """SELECT     m.member_id ,  
+           m.first_name       AS 'member first name', 
+           m.last_name        AS 'member last name',  
+           m.is_student       AS 'student',  
+           m.is_faculty       AS 'faculty',  
+           t.date_warning     AS 'due date' 
+FROM       MEMBER             AS m  
+INNER JOIN TRANSACTION        AS t  
+ON         m.member_id = t.member_id  
+WHERE      t.is_returned = 0  
+AND        m.member_id = {}
+ORDER BY   m.member_id"""
+        mem2 = Label(self,text = 'Enter Member ID:', font = ('bold',12),padx=5,pady=5,relief=RIDGE)
+        mem2.place(x=0,y=490)
+        mem_id2 = Entry(self)
+        mem_id2.place(x = 120, y = 490) 
+        fetch6 = Button(self, text = 'Display Data' , font =('italic',10 ), bg = 'white')
+        fetch6.bind("<Button-1>",lambda event : print_data(self,query6, mem_id2.get()))
+        fetch6.place(x = 120 , y = 520)
+        
+        
+        
+        
+class MainView(Frame):
+    def __init__(self, *args, **kwargs):
+        Frame.__init__(self, *args, **kwargs)
+        p1 = Page1(self)
+        p2 = Page2(self)
+        p3 = Page3(self)
+        p4 = Page4(self)
+        p5 = Page5(self)
+        p6 = Page6(self)
+
+        buttonframe = Frame(self)
+        container = Frame(self)
+        buttonframe.pack(side="top", fill="x", expand=False)
+        container.pack(side="top", fill="both", expand=True)
+
+        p1.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
+        p2.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
+        p3.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
+        p4.place(in_=container, x=0, y=0, relwidth=1, relheight=1 )
+        p5.place(in_=container, x=0, y=0, relwidth=1, relheight=1 )
+        p6.place(in_=container, x=0, y=0, relwidth=1, relheight=1 )
+
+        b1 = Button(buttonframe, text="Home", command=p1.show)
+        b2 = Button(buttonframe, text="Member", command=p2.show)
+        b3 = Button(buttonframe, text="Staff", command=p3.show)
+        b4 = Button(buttonframe, text = "Transaction", command=p4.show)
+        b5 = Button(buttonframe, text = "Dashboard", command=p5.show)
+        b6 = Button(buttonframe, text = "Infromational Queries", command=p6.show)
+
+        b1.pack(side="left")
+        b2.pack(side="left")
+        b3.pack(side="left")
+        b4.pack(side='left')
+        b5.pack(side='left')
+        b6.pack(side='left')
+        
+
+        p1.show()
+
+if __name__ == "__main__":
+    root = Tk()
+    root.title('Library Management System')
+    main = MainView(root)
+    main.pack(side="top", fill="both", expand=True)
+    root.wm_geometry("1300x1300+0+0")      
+    root.mainloop()
